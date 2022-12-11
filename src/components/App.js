@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 // import axios from 'axios';
-// import Modal from './Modal/Modal';
+import Modal from './Modal/Modal';
 
 class App extends Component {
   state = {
