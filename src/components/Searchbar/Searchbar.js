@@ -6,7 +6,7 @@ import {
   SearchForm,
   SearchFormButton,
   SearchFormInput,
-} from './Searchbar.styled.js';
+} from './Searchbar.styled';
 import PropTypes from 'prop-types';
 
 export default class Searchbar extends Component {
@@ -46,7 +46,6 @@ export default class Searchbar extends Component {
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
-            value={this.state.searchItem}
             onChange={this.handleSearchChange}
           />
         </SearchForm>

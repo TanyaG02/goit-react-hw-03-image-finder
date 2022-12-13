@@ -1,52 +1,93 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// import Modal from './Modal/Modal';
+import ImageGallery from './ImageGallery/ImageGallery';
+import Modal from './Modal';
 import Searchbar from './Searchbar/Searchbar';
-
-axios.defaults.baseURL = 'https://pixabay.com/api';
+import ApiFetch from './Api';
 
 class App extends Component {
   state = {
     searchItem: '',
+    totalImages: 0,
     items: [],
     status: 'idle',
     page: 1,
     showModal: false,
-    imageModal: null,
   };
 
-  // async componentDidUpdate(prevProps, prevState) {
-  //   const prevSearch = prevState.searchItem;
-  //   const newSearch = this.state.searchItem;
-  //   const prevPage = prevState.page;
-  //   const newPage = this.state.page;
-  // }
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      prevState.searchItem !== this.state.searchItem ||
+      prevState.page !== this.state.page
+    ) {
+      this.getFetchImage();
+    }
+  }
 
-  // if(condition) {}
-
-  handleFormSubmit = searchItem => {
-    this.setState({ searchItem });
+  fetchImage = async () => {
+    const response = await ApiFetch(this.state.searchItem, this.state.page);
+    this.setState({ totalImages: response.totalHits });
+    if (this.state.page === 1) {
+      response.totalHits === 0
+        ? toast.error('Oops, somethings wrong!')
+        : toast.success('Success!');
+    }
+    return response;
   };
 
-  // toggleModal = () => {
-  //   this.setState(({ showModal }) => ({ showModal: !showModal }));
-  // };
+  getFetchImage = async () => {
+    try {
+      const response = await this.fetchImage();
+      this.setState(prevState => ({
+        items: [...prevState.items, response.hits],
+      }));
+    } catch {
+      toast.error('Oops, somethings wrong!');
+    }
+    // finally {
+    //   this.setState
+    // }
+  };
+
+  finderImage = word => {
+    this.setState({ error: false });
+    if (this.state.searchItem !== word) {
+      this.setState({ searchItem: word, page: 1, items: [] });
+    }
+  };
+
+  onModalClick = event => {
+    this.toggleModal();
+
+    const currentImage = Number(event.target.id);
+    const currentItem = this.state.items.find(item => item.id === currentImage);
+    const modalData = {
+      src: currentItem.largeImageURL,
+      alt: currentItem.tags,
+    };
+    this.setState({ modalData });
+  };
+
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  };
+
   render() {
-    // const { showModal } = this.state;
+    const { showModal, items } = this.state;
 
     return (
       <>
         {/* <button type="button" onClick={this.toggleModal}>
           Open
         </button> */}
-        {/* {showModal && (
+        {showModal && (
           <Modal onClose={this.toggleModal}>
-            <img src={imageModal} alt="" />
+            <img src="" alt="" />
           </Modal>
-        )} */}
-        <Searchbar onSubmit={this.handleFormSubmit} />
+        )}
+        <Searchbar onSubmit={this.finderImage} />
+        <ImageGallery imageModal={this.onModalClick} items={items} />
         <ToastContainer autoClose={3000} />
       </>
     );
